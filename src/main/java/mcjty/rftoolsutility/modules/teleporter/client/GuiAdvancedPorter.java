@@ -99,11 +99,11 @@ public class GuiAdvancedPorter extends GuiItemScreen {
     }
 
     @Override
-    protected void renderInternal(@Nonnull GuiGraphics graphics, int xSize_lo, int ySize_lo, float par3) {
+    protected void renderInternal(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         for (int i = 0; i < AdvancedChargedPorterItem.MAXTARGETS; i++) {
             setTarget(i);
         }
-        drawWindow(graphics);
+        drawWindow(graphics, mouseX, mouseY, partialTicks);
     }
 
     public static void open() {
