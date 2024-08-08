@@ -1,9 +1,11 @@
 package mcjty.rftoolsutility.modules.crafter.data;
 
+import com.mojang.datafixers.util.Pair;
 import mcjty.lib.varia.InventoryTools;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -32,6 +34,7 @@ public class CraftingRecipe {
     }, 3, 3);
     private ItemStack result = ItemStack.EMPTY;
 
+    private ResourceLocation recipeId;
     private boolean recipePresent = false;
     private Recipe recipe = null;
 
@@ -89,10 +92,6 @@ public class CraftingRecipe {
         return compressedIngredients;
     }
 
-    public static Recipe findRecipe(Level world, CraftingContainer inv) {
-        return world.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, inv, world).orElse(null);
-    }
-
     public void readFromNBT(CompoundTag tagCompound) {
         ListTag nbtTagList = tagCompound.getList("Items", Tag.TAG_COMPOUND);
         for (int i = 0; i < nbtTagList.size(); i++) {
@@ -102,6 +101,7 @@ public class CraftingRecipe {
         result = ItemStack.of(resultCompound);
         keepOne = tagCompound.getBoolean("Keep") ? KeepMode.KEEP : KeepMode.ALL;
         craftMode = CraftMode.values()[tagCompound.getByte("Int")];
+        recipeId = ResourceLocation.tryParse(tagCompound.getString("RecipeId"));
         recipePresent = false;
     }
 
@@ -123,6 +123,9 @@ public class CraftingRecipe {
         tagCompound.put("Items", nbtTagList);
         tagCompound.putBoolean("Keep", keepOne == KeepMode.KEEP);
         tagCompound.putByte("Int", (byte) craftMode.ordinal());
+        if (recipe != null) {
+            tagCompound.putString("RecipeId", recipe.getId().toString());
+        }
     }
 
     public void setRecipe(ItemStack[] items, ItemStack result) {
@@ -148,7 +151,8 @@ public class CraftingRecipe {
     public Recipe getCachedRecipe(Level world) {
         if (!recipePresent) {
             recipePresent = true;
-            recipe = findRecipe(world, inv);
+            recipe = world.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, inv, world, recipeId).map(Pair::getSecond).orElse(null);
+            recipeId = recipe != null ? recipe.getId() : null;
             compressedIngredients = null;
         }
         return recipe;

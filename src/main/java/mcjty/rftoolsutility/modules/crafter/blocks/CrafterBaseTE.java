@@ -39,6 +39,7 @@ import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -129,7 +130,9 @@ public class CrafterBaseTE extends TickingTileEntity implements JEIRecipeAccepto
                 }
             }
             if (matchingRecipe == null) {
-                matchingRecipe = CraftingRecipe.findRecipe(level, workInventory);
+                matchingRecipe = level.getRecipeManager()
+                                      .getRecipeFor(RecipeType.CRAFTING, workInventory, level)
+                                      .orElse(null);
             }
             if (matchingRecipe != null) {
                 ItemStack result = BaseRecipe.assemble(matchingRecipe, workInventory, level);
