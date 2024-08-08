@@ -10,7 +10,6 @@ import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 
@@ -91,13 +90,7 @@ public class CraftingRecipe {
     }
 
     public static Recipe findRecipe(Level world, CraftingContainer inv) {
-        RecipeManager recipeManager = world.getRecipeManager();
-        for (Recipe r : recipeManager.getRecipes()) {
-            if (r != null && RecipeType.CRAFTING.equals(r.getType()) && r.matches(inv, world)) {
-                return r;
-            }
-        }
-        return null;
+        return world.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, inv, world).orElse(null);
     }
 
     public void readFromNBT(CompoundTag tagCompound) {
